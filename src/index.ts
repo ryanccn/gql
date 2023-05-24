@@ -1,17 +1,17 @@
-interface CreateGQLOptions {
+export interface CreateGQLOptions {
 	method?: string;
 	headers?: HeadersInit;
 }
 
-interface GraphQLResponseSuccess {
+export interface GraphQLResponseSuccess {
 	success: true;
 	data: unknown;
 }
-interface GraphQLResponseFailure {
+export interface GraphQLResponseFailure {
 	success: false;
 	response: Response;
 }
-type GraphQLResponse = GraphQLResponseSuccess | GraphQLResponseFailure;
+export type GraphQLResponse = GraphQLResponseSuccess | GraphQLResponseFailure;
 
 export const createGql = (url: string, options?: CreateGQLOptions) => {
 	return async (
