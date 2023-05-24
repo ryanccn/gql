@@ -1,0 +1,23 @@
+{
+	"name": "@ryanccn/gql",
+	"version": "0.1.0",
+	"description": "A tiny GraphQL querying library",
+	"main": "dist/index.cjs",
+	"module": "dist/index.mjs",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"build": "tsup"
+	},
+	"keywords": [
+		"graphql",
+		"fetch"
+	],
+	"author": "Ryan Cao <hello@ryanccn.dev>",
+	"license": "MIT",
+	"devDependencies": {
+		"@types/node": "^20.2.3",
+		"prettier": "^2.8.8",
+		"tsup": "^6.7.0",
+		"typescript": "^5.0.4"
+	}
+}
