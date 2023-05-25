@@ -14,22 +14,23 @@ export interface GraphQLResponseFailure {
 export type GraphQLResponse = GraphQLResponseSuccess | GraphQLResponseFailure;
 
 export const createGql = (url: string, options?: CreateGQLOptions) => {
-	return async (
-		a: TemplateStringsArray,
-		...b: unknown[]
-	): Promise<GraphQLResponse> => {
+	return async (a: TemplateStringsArray, ...b: unknown[]) => {
 		const query = String.raw({ raw: a }, ...b);
 
-		const res = await fetch(url, {
-			method: options?.method ?? "POST",
-			headers: { "Content-Type": "application/json", ...options?.headers },
-			body: JSON.stringify({ query }),
-		});
+		return async (
+			variables?: Record<string, unknown>
+		): Promise<GraphQLResponse> => {
+			const res = await fetch(url, {
+				method: options?.method ?? "POST",
+				headers: { "Content-Type": "application/json", ...options?.headers },
+				body: JSON.stringify({ query, ...(variables ? { variables } : {}) }),
+			});
 
-		if (!res.ok) {
-			return { success: false, response: res };
-		}
+			if (!res.ok) {
+				return { success: false, response: res };
+			}
 
-		return { success: true, data: (await res.json()) as unknown };
+			return { success: true, data: (await res.json()) as unknown };
+		};
 	};
 };
