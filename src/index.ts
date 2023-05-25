@@ -14,7 +14,7 @@ export interface GraphQLResponseFailure {
 export type GraphQLResponse = GraphQLResponseSuccess | GraphQLResponseFailure;
 
 export const createGql = (url: string, options?: CreateGQLOptions) => {
-	return async (a: TemplateStringsArray, ...b: unknown[]) => {
+	return (a: TemplateStringsArray, ...b: unknown[]) => {
 		const query = String.raw({ raw: a }, ...b);
 
 		return async (
