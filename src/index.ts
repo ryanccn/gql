@@ -61,7 +61,7 @@ export const createGql = (url: string, options?: CreateGQLOptions) => {
 		 * @returns The response from the API
 		 */
 		const f = async (
-			variables?: Record<string, unknown>
+			variables?: Record<string, unknown>,
 		): Promise<GraphQLResponse> => {
 			const res = await fetch(url, {
 				method: options?.method ?? "POST",
