@@ -14,11 +14,11 @@ export interface CreateGQLOptions {
 }
 
 /** A successful GraphQL response (i.e. 2xx status code) */
-export interface GraphQLResponseSuccess {
+export interface GraphQLResponseSuccess<D extends unknown> {
 	/** Whether the request was successful */
 	success: true;
 	/** The data returned from the GraphQL API */
-	data: unknown;
+	data: D;
 }
 
 /** A failed GraphQL response */
@@ -34,7 +34,9 @@ export interface GraphQLResponseFailure {
  *
  * Discriminate via the `success` key.
  */
-export type GraphQLResponse = GraphQLResponseSuccess | GraphQLResponseFailure;
+export type GraphQLResponse<D extends unknown> =
+	| GraphQLResponseSuccess<D>
+	| GraphQLResponseFailure;
 
 /**
  * Creates a GraphQL template literal tag from a URL endpoint and an optional set of options
@@ -62,7 +64,7 @@ export const createGql = (url: string, options?: CreateGQLOptions) => {
 		 */
 		const f = async (
 			variables?: Record<string, unknown>,
-		): Promise<GraphQLResponse> => {
+		): Promise<GraphQLResponse<unknown>> => {
 			const res = await fetch(url, {
 				method: options?.method ?? "POST",
 				headers: { "Content-Type": "application/json", ...options?.headers },
