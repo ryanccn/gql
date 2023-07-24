@@ -4,7 +4,7 @@ A tiny GraphQL querying library.
 
 ## Installation
 
-```bash
+```console
 $ npm install @ryanccn/gql
 $ yarn add @ryanccn/gql
 $ pnpm add @ryanccn/gql
@@ -23,7 +23,7 @@ const { success, data } = await gql`
 			name
 		}
 	}
-`;
+`();
 ```
 
 ## License

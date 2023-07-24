@@ -22,11 +22,13 @@ export interface GraphQLResponseSuccess<D extends unknown> {
 }
 
 /** A failed GraphQL response */
-export interface GraphQLResponseFailure {
+export interface GraphQLResponseFailure<E extends unknown> {
 	/** Whether the request was successful */
 	success: false;
+	/** The parsed error returned, if any */
+	error?: E;
 	/** The raw Response returned from `fetch` */
-	response: Response;
+	response?: Response;
 }
 
 /**
@@ -34,9 +36,9 @@ export interface GraphQLResponseFailure {
  *
  * Discriminate via the `success` key.
  */
-export type GraphQLResponse<D extends unknown> =
+export type GraphQLResponse<D extends unknown, E extends unknown> =
 	| GraphQLResponseSuccess<D>
-	| GraphQLResponseFailure;
+	| GraphQLResponseFailure<E>;
 
 /**
  * Creates a GraphQL template literal tag from a URL endpoint and an optional set of options
@@ -53,8 +55,11 @@ export const createGql = (url: string, options?: CreateGQLOptions) => {
 	 * @param substitutions Substitutions (this is a template literal internal)
 	 * @returns An async function for making the request
 	 */
-	const h = (query: TemplateStringsArray, ...substitutions: unknown[]) => {
-		const query2 = String.raw({ raw: query }, ...substitutions);
+	const gqlFactory = (
+		query: TemplateStringsArray,
+		...substitutions: unknown[]
+	) => {
+		const parsedQuery = String.raw({ raw: query }, ...substitutions);
 
 		/**
 		 * Makes the actual GraphQL request
@@ -62,14 +67,14 @@ export const createGql = (url: string, options?: CreateGQLOptions) => {
 		 * @param variables GraphQL variables to send additionally to the GraphQL API
 		 * @returns The response from the API
 		 */
-		const f = async (
+		const makeRequest = async (
 			variables?: Record<string, unknown>,
-		): Promise<GraphQLResponse<unknown>> => {
+		): Promise<GraphQLResponse<unknown, unknown>> => {
 			const res = await fetch(url, {
 				method: options?.method ?? "POST",
 				headers: { "Content-Type": "application/json", ...options?.headers },
 				body: JSON.stringify({
-					query: query2,
+					query: parsedQuery,
 					...(variables ? { variables } : {}),
 				}),
 			});
@@ -78,11 +83,16 @@ export const createGql = (url: string, options?: CreateGQLOptions) => {
 				return { success: false, response: res };
 			}
 
-			return { success: true, data: (await res.json()) as unknown };
+			const jsonData = await res.json();
+			if ("error" in jsonData) {
+				return { success: false, error: jsonData.error };
+			}
+
+			return { success: true, data: jsonData.data as unknown };
 		};
 
-		return f;
+		return makeRequest;
 	};
 
-	return h;
+	return gqlFactory;
 };
