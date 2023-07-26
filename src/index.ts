@@ -94,5 +94,12 @@ export const createGql = (url: string, options?: CreateGQLOptions) => {
 		return makeRequest;
 	};
 
-	return gqlFactory;
+	const patchedGqlFactory = new Proxy(gqlFactory, {
+		get: (target, key) => {
+			if (key === "gql") return target;
+			return key in target ? target[key as keyof typeof target] : undefined;
+		},
+	}) as typeof gqlFactory & { gql: typeof gqlFactory };
+
+	return patchedGqlFactory;
 };

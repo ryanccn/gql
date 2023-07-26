@@ -26,6 +26,24 @@ const { success, data } = await gql`
 `();
 ```
 
+If your GraphQL client is named something else, you can also do
+
+```typescript
+import { createGql } from "@ryanccn/gql";
+
+const gqlClient = createGql("https://countries.trevorblades.com/");
+
+const { success, data } = await gqlClient.gql`
+	query {
+		continents {
+			name
+		}
+	}
+`();
+```
+
+to retain the DX benefits of the `gql` tag.
+
 ## License
 
 MIT
