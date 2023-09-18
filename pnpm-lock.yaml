@@ -7,7 +7,7 @@ settings:
 devDependencies:
   '@types/node':
     specifier: ^20.4.4
-    version: 20.4.4
+    version: 20.6.2
   prettier:
     specifier: ^3.0.0
     version: 3.0.0
@@ -273,8 +273,8 @@ packages:
       fastq: 1.15.0
     dev: true
 
-  /@types/node@20.4.4:
-    resolution: {integrity: sha512-CukZhumInROvLq3+b5gLev+vgpsIqC2D0deQr/yS1WnxvmYLlJXZpaQrQiseMY+6xusl79E04UjWoqyr+t1/Ew==}
+  /@types/node@20.6.2:
+    resolution: {integrity: sha512-Y+/1vGBHV/cYk6OI1Na/LHzwnlNCAfU3ZNGrc1LdRe/LAIbdDPTTv/HU3M7yXN448aTVDq3eKRm2cg7iKLb8gw==}
     dev: true
 
   /any-promise@1.3.0:
