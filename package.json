@@ -25,9 +25,9 @@
 	"author": "Ryan Cao <hello@ryanccn.dev>",
 	"license": "MIT",
 	"devDependencies": {
-		"@types/node": "^20.4.4",
-		"prettier": "^3.0.0",
+		"@types/node": "^20.8.6",
+		"prettier": "^3.0.3",
 		"tsup": "^7.1.0",
-		"typescript": "^5.1.6"
+		"typescript": "^5.2.2"
 	}
 }
