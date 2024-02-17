@@ -14,7 +14,7 @@ export interface CreateGQLOptions {
 }
 
 /** A successful GraphQL response (i.e. 2xx status code) */
-export interface GraphQLResponseSuccess<D extends unknown> {
+export interface GraphQLResponseSuccess<D> {
 	/** Whether the request was successful */
 	success: true;
 	/** The data returned from the GraphQL API */
@@ -22,7 +22,7 @@ export interface GraphQLResponseSuccess<D extends unknown> {
 }
 
 /** A failed GraphQL response */
-export interface GraphQLResponseFailure<E extends unknown> {
+export interface GraphQLResponseFailure<E> {
 	/** Whether the request was successful */
 	success: false;
 	/** The parsed error returned, if any */
@@ -36,7 +36,7 @@ export interface GraphQLResponseFailure<E extends unknown> {
  *
  * Discriminate via the `success` key.
  */
-export type GraphQLResponse<D extends unknown, E extends unknown> =
+export type GraphQLResponse<D, E> =
 	| GraphQLResponseSuccess<D>
 	| GraphQLResponseFailure<E>;
 
@@ -83,12 +83,14 @@ export const createGql = (url: string, options?: CreateGQLOptions) => {
 				return { success: false, response: res };
 			}
 
-			const jsonData = await res.json();
-			if ("error" in jsonData) {
-				return { success: false, error: jsonData.error };
-			}
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+			const data = await res.json();
 
-			return { success: true, data: jsonData.data as unknown };
+			return "data" in data
+				? // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+					{ success: true, data: data.data }
+				: // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+					{ success: false, error: data.error };
 		};
 
 		return makeRequest;

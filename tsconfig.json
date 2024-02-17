@@ -2,12 +2,17 @@
 	"compilerOptions": {
 		"module": "esnext",
 		"target": "esnext",
-		"moduleResolution": "node",
-		"jsx": "react",
+		"moduleResolution": "bundler",
+		"jsx": "preserve",
 		"strict": true,
 		"strictNullChecks": true,
 		"strictFunctionTypes": true,
+		"moduleDetection": "force",
+		"esModuleInterop": true,
+		"allowSyntheticDefaultImports": true,
+		"skipLibCheck": true,
 		"noEmit": true
 	},
-	"exclude": ["node_modules", "**/node_modules/*"]
+	"include": ["**/*.js", "**/*.ts"],
+	"exclude": ["dist/**/*"]
 }
