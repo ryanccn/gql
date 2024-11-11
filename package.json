@@ -33,7 +33,7 @@
 	],
 	"devDependencies": {
 		"@microsoft/eslint-formatter-sarif": "^3.0.0",
-		"@ryanccn/eslint-config": "^0.1.0",
+		"@ryanccn/eslint-config": "^0.4.2",
 		"@types/node": "^22.1.0",
 		"eslint": "^8.56.0",
 		"prettier": "^3.2.5",
