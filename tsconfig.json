@@ -4,15 +4,18 @@
 		"target": "esnext",
 		"moduleResolution": "bundler",
 		"jsx": "preserve",
+		"allowJs": true,
 		"strict": true,
 		"strictNullChecks": true,
 		"strictFunctionTypes": true,
 		"moduleDetection": "force",
 		"esModuleInterop": true,
 		"allowSyntheticDefaultImports": true,
+		"erasableSyntaxOnly": true,
+		"rewriteRelativeImportExtensions": true,
 		"skipLibCheck": true,
 		"noEmit": true
 	},
 	"include": ["**/*.js", "**/*.ts"],
-	"exclude": ["dist/**/*"]
+	"exclude": ["dist/**/*", "coverage/**/*"]
 }

@@ -13,22 +13,24 @@ export interface CreateGQLOptions {
 	headers?: HeadersInit;
 }
 
-/** A successful GraphQL response (i.e. 2xx status code) */
-export interface GraphQLResponseSuccess<D> {
+/** A successful GraphQL response */
+export interface GraphQLResponseSuccess<D, E> {
 	/** Whether the request was successful */
 	success: true;
 	/** The data returned from the GraphQL API */
 	data: D;
+	/** The errors returned from the GraphQL API, if any */
+	errors?: E;
 }
 
 /** A failed GraphQL response */
-export interface GraphQLResponseFailure<E> {
+export interface GraphQLResponseFailure<D, E> {
 	/** Whether the request was successful */
 	success: false;
-	/** The parsed error returned, if any */
-	error?: E;
-	/** The raw Response returned from `fetch` */
-	response?: Response;
+	/** The data returned from the GraphQL API */
+	data?: D;
+	/** The errors returned from the GraphQL API, if any */
+	errors?: E;
 }
 
 /**
@@ -37,11 +39,17 @@ export interface GraphQLResponseFailure<E> {
  * Discriminate via the `success` key.
  */
 export type GraphQLResponse<D, E> =
-	| GraphQLResponseSuccess<D>
-	| GraphQLResponseFailure<E>;
+	| GraphQLResponseSuccess<D, E>
+	| GraphQLResponseFailure<D, E>;
+
+type MakeRecursiveGQL<F> = F & { gql: MakeRecursiveGQL<F> };
+
+const never = (message: string) => {
+	throw new Error(message);
+};
 
 /**
- * Creates a GraphQL template literal tag from a URL endpoint and an optional set of options
+ * Creates a GraphQL template literal tag from a URL endpoint
  *
  * @param url The URL endpoint of the GraphQL API
  * @param options Options for the GraphQL instance
@@ -49,7 +57,7 @@ export type GraphQLResponse<D, E> =
  */
 export const createGql = (url: string, options?: CreateGQLOptions) => {
 	/**
-	 * Creates a request async function from a query template literal that can be called to get a response
+	 * Creates a request function from a query template literal that can be called to get a response
 	 *
 	 * @param query The GraphQL query
 	 * @param substitutions Substitutions (this is a template literal internal)
@@ -59,49 +67,59 @@ export const createGql = (url: string, options?: CreateGQLOptions) => {
 		query: TemplateStringsArray,
 		...substitutions: unknown[]
 	) => {
-		const parsedQuery = String.raw({ raw: query }, ...substitutions);
+		const interpolatedQuery = String.raw({ raw: query }, ...substitutions);
 
 		/**
-		 * Makes the actual GraphQL request
+		 * Send the GraphQL request
 		 *
-		 * @param variables GraphQL variables to send additionally to the GraphQL API
+		 * @param variables GraphQL variables to send to the GraphQL API
 		 * @returns The response from the API
 		 */
 		const makeRequest = async (
 			variables?: Record<string, unknown>,
 		): Promise<GraphQLResponse<unknown, unknown>> => {
-			const res = await fetch(url, {
+			const headers = new Headers(options?.headers);
+			headers.set("content-type", "application/json;charset=utf-8");
+
+			const response = await fetch(url, {
 				method: options?.method ?? "POST",
-				headers: { "Content-Type": "application/json", ...options?.headers },
+				headers,
 				body: JSON.stringify({
-					query: parsedQuery,
+					query: interpolatedQuery,
 					...(variables ? { variables } : {}),
 				}),
 			});
 
-			if (!res.ok) {
-				return { success: false, response: res };
+			if (!response.ok) {
+				never(
+					`Received unexpected response from GraphQL API: ${response.status}`,
+				);
 			}
 
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-			const data = await res.json();
+			const result = (await response.json()) as {
+				data?: unknown;
+				errors?: unknown;
+			};
 
-			return "data" in data
-				? // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-					{ success: true, data: data.data }
-				: // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-					{ success: false, error: data.error };
+			return "data" in result && (!("errors" in result) || !result.errors)
+				? {
+						success: true,
+						data: result.data,
+					}
+				: "data" in result || "errors" in result
+					? {
+							success: false,
+							...("data" in result ? { data: result.data } : {}),
+							...("errors" in result ? { errors: result.errors } : {}),
+						}
+					: never(
+							`Received unexpected data from GraphQL API: ${JSON.stringify(result)}`,
+						);
 		};
 
 		return makeRequest;
 	};
 
-	const patchedGqlFactory = new Proxy(gqlFactory, {
-		get: (target, key) => {
-			if (key === "gql") return target;
-			return key in target ? target[key as keyof typeof target] : undefined;
-		},
-	}) as typeof gqlFactory & { gql: typeof gqlFactory };
-
-	return patchedGqlFactory;
+	Object.assign(gqlFactory, { gql: gqlFactory });
+	return gqlFactory as MakeRecursiveGQL<typeof gqlFactory>;
 };
